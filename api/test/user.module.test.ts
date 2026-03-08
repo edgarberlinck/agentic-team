@@ -59,7 +59,7 @@ describe("User Module", () => {
       });
 
       const userModule = new UserModule();
-      
+
       expect(async () => {
         await userModule.create({
           username: "newuser",
@@ -81,7 +81,7 @@ describe("User Module", () => {
       });
 
       const userModule = new UserModule();
-      
+
       expect(async () => {
         await userModule.create({
           username: "testuser",
@@ -104,9 +104,9 @@ describe("User Module", () => {
         password: "password123",
       });
 
-      const createCall = mockCreate.mock.calls[0][0];
-      expect(createCall.data.password).not.toBe("password123");
-      expect(createCall.data.password).toMatch(/^\$argon2/);
+      const createCall = mockCreate.mock.calls[0]?.[0];
+      expect(createCall?.data.password).not.toBe("password123");
+      expect(createCall?.data.password).toMatch(/^\$argon2/);
     });
   });
 
@@ -200,7 +200,9 @@ describe("User Module", () => {
       mockFindMany.mockResolvedValue([]);
 
       const userModule = new UserModule();
-      const users = await userModule.query({ email: "nonexistent@example.com" });
+      const users = await userModule.query({
+        email: "nonexistent@example.com",
+      });
 
       expect(users).toHaveLength(0);
     });
