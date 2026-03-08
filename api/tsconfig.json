@@ -26,6 +26,9 @@
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false,
 
-    "outDir": "dist"
+    "outDir": "dist",
+    "paths": {
+      "@/*": ["./*"]
+    }
   }
 }

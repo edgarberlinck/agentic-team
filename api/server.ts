@@ -9,7 +9,7 @@ const server = Bun.serve({
     "/api/public/auth": {
       POST: (req: BunRequest) => {
         const cookies = req.cookies;
-
+        // Read: https://bun.com/docs/runtime/hashing
         cookies.set("user_id", "1234", {
           maxAge: 60 * 60 * 24 * 7,
           httpOnly: true,
