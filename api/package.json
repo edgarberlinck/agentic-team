@@ -3,6 +3,9 @@
   "module": "server.ts",
   "type": "module",
   "private": true,
+  "scripts": {
+    "dev": "bun --hot --env-file=.env server.ts"
+  },
   "devDependencies": {
     "@types/bun": "^1.3.10"
   },

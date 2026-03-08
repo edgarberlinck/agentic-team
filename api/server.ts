@@ -1,8 +1,9 @@
 import type { BunRequest } from "bun";
+import "./config";
 
 const server = Bun.serve({
-  development: true,
-  port: 5001, // Zero uses a random port
+  development: Bun.env.DEV === "true",
+  port: Bun.env.PORT, // Zero uses a random port
   //hostname: "mydomain.com", // defaults to 0.0.0.0
   routes: {
     "/api/public/auth": {
@@ -57,3 +58,6 @@ const server = Bun.serve({
 });
 
 console.log(`Server running at ${server.url}`);
+if (Bun.env.DEV === "true") {
+  console.log("Development mode on");
+}
