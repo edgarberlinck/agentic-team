@@ -6,6 +6,8 @@ export interface IUserModule {
 
 export type User = {
   id: string;
+  firstName: string;
+  lastName: string;
   username: string;
   email: string;
   password: string;
@@ -15,11 +17,8 @@ export class UserModule implements IUserModule {
   async create(user: Omit<User, "id">): Promise<Omit<User, "password">> {
     const existingUser = await prisma.user.findFirst({
       where: {
-        OR: [
-          { email: user.email },
-          { username: user.username }
-        ]
-      }
+        OR: [{ email: user.email }, { username: user.username }],
+      },
     });
 
     if (existingUser) {
@@ -36,6 +35,8 @@ export class UserModule implements IUserModule {
 
     return {
       id: newUser.id,
+      firstName: newUser.firstName,
+      lastName: newUser.lastName,
       username: newUser.username,
       email: newUser.email,
     };
@@ -48,6 +49,8 @@ export class UserModule implements IUserModule {
 
     return users.map((user) => ({
       id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
       username: user.username,
       email: user.email,
     }));
