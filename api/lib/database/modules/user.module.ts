@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 
 export interface IUserModule {
   create: (user: Omit<User, "id">) => Promise<Omit<User, "password">>;
+  findByEmail: (email: string) => Promise<User | null>;
 }
 
 export type User = {
@@ -54,5 +55,22 @@ export class UserModule implements IUserModule {
       username: user.username,
       email: user.email,
     }));
+  }
+
+  async findByEmail(email: string): Promise<User | null> {
+    const user = await prisma.user.findFirst({ where: { email } });
+
+    if (!user) {
+      return null;
+    }
+
+    return {
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      username: user.username,
+      email: user.email,
+      password: user.password,
+    };
   }
 }

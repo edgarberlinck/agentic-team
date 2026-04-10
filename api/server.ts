@@ -1,13 +1,14 @@
 import type { BunRequest } from "bun";
 import "./config";
 import { SignUp } from "./lib/use-cases/signup/signup-usecase";
+import { SignIn } from "./lib/use-cases/signin/signin-usecase";
 
 const server = Bun.serve({
   development: Bun.env.DEV === "true",
   port: Bun.env.PORT, // Zero uses a random port
   //hostname: "mydomain.com", // defaults to 0.0.0.0
   routes: {
-    "/api/public/signin": {
+    "/api/public/signup": {
       POST: async (req: BunRequest) => {
         const body = await req.json();
         const result = await SignUp(body);
@@ -19,11 +20,18 @@ const server = Bun.serve({
         return new Response(null, { status: 201 });
       },
     },
-    "/api/public/auth": {
-      POST: (req: BunRequest) => {
+    "/api/public/signin": {
+      POST: async (req: BunRequest) => {
+        const body = await req.json();
+        const result = await SignIn(body);
+
+        if (!result.success) {
+          return Response.json({ error: result.error }, { status: 500 });
+        }
+
         const cookies = req.cookies;
         // Read: https://bun.com/docs/runtime/hashing
-        cookies.set("user_id", "1234", {
+        cookies.set("user_id", result.data.id, {
           maxAge: 60 * 60 * 24 * 7,
           httpOnly: true,
           secure: true,

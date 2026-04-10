@@ -22,7 +22,7 @@ const mockUserCreate = mock(async () => mockCreatedUser);
 
 beforeEach(() => {
   spyOn(PrismaDatabase, "getDatabase").mockReturnValue({
-    user: { create: mockUserCreate },
+    user: { create: mockUserCreate, findByEmail: mock(async () => null) },
   });
   mockUserCreate.mockClear();
 });
