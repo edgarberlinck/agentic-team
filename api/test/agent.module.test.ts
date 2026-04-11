@@ -93,8 +93,8 @@ describe("AgentModule", () => {
 
     expect(Array.isArray(result)).toBe(true);
     if (result.length > 0) {
-      expect(result[0].id).toBeDefined();
-      expect(result[0].alias).toBeDefined();
+      expect(result[0]?.id).toBeDefined();
+      expect(result[0]?.alias).toBeDefined();
     }
   });
 

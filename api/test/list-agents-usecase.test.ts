@@ -32,8 +32,8 @@ describe("ListAgentsUseCase", () => {
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data).toHaveLength(2);
-      expect(result.data[0].alias).toBe("assistant");
-      expect(result.data[1].alias).toBe("coder");
+      expect(result.data[0]?.alias).toBe("assistant");
+      expect(result.data[1]?.alias).toBe("coder");
     }
   });
 
