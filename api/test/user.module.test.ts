@@ -1,5 +1,4 @@
 import { describe, expect, test, mock, beforeEach } from "bun:test";
-import { UserModule } from "@/lib/database/modules/user.module";
 
 const mockCreate = mock(async ({ data }) => ({
   id: "mock-id-123",
@@ -24,6 +23,11 @@ mock.module("@/lib/prisma", () => ({
   },
 }));
 
+async function createUserModule() {
+  const { UserModule } = await import("@/lib/database/modules/user.module");
+  return new UserModule();
+}
+
 describe("User Module", () => {
   beforeEach(() => {
     mockCreate.mockClear();
@@ -35,7 +39,7 @@ describe("User Module", () => {
     test("should create a user successfully", async () => {
       mockFindFirst.mockResolvedValue(null);
 
-      const userModule = new UserModule();
+      const userModule = await createUserModule();
       const newUser = await userModule.create({
         username: "testuser",
         email: "test@example.com",
@@ -58,7 +62,7 @@ describe("User Module", () => {
         password: "hashedpassword",
       });
 
-      const userModule = new UserModule();
+      const userModule = await createUserModule();
 
       expect(async () => {
         await userModule.create({
@@ -80,7 +84,7 @@ describe("User Module", () => {
         password: "hashedpassword",
       });
 
-      const userModule = new UserModule();
+      const userModule = await createUserModule();
 
       expect(async () => {
         await userModule.create({
@@ -97,7 +101,7 @@ describe("User Module", () => {
     test("should hash password before storing", async () => {
       mockFindFirst.mockResolvedValue(null);
 
-      const userModule = new UserModule();
+      const userModule = await createUserModule();
       await userModule.create({
         username: "testuser",
         email: "test@example.com",
@@ -127,7 +131,7 @@ describe("User Module", () => {
         },
       ]);
 
-      const userModule = new UserModule();
+      const userModule = await createUserModule();
       const users = await userModule.query({});
 
       expect(users).toHaveLength(2);
@@ -146,7 +150,7 @@ describe("User Module", () => {
         },
       ]);
 
-      const userModule = new UserModule();
+      const userModule = await createUserModule();
       const users = await userModule.query({ email: "test@example.com" });
 
       expect(users).toHaveLength(1);
@@ -167,7 +171,7 @@ describe("User Module", () => {
         },
       ]);
 
-      const userModule = new UserModule();
+      const userModule = await createUserModule();
       const users = await userModule.query({ username: "testuser" });
 
       expect(users).toHaveLength(1);
@@ -188,7 +192,7 @@ describe("User Module", () => {
         },
       ]);
 
-      const userModule = new UserModule();
+      const userModule = await createUserModule();
       const users = await userModule.query({ id: "specific-id" });
 
       expect(users).toHaveLength(1);
@@ -199,12 +203,52 @@ describe("User Module", () => {
     test("should return empty array when no users match", async () => {
       mockFindMany.mockResolvedValue([]);
 
-      const userModule = new UserModule();
+      const userModule = await createUserModule();
       const users = await userModule.query({
         email: "nonexistent@example.com",
       });
 
       expect(users).toHaveLength(0);
+    });
+  });
+
+  describe("findByEmail", () => {
+    test("should return null when user is not found", async () => {
+      mockFindFirst.mockResolvedValue(null);
+
+      const userModule = await createUserModule();
+      const user = await userModule.findByEmail("missing@example.com");
+
+      expect(user).toBeNull();
+      expect(mockFindFirst).toHaveBeenCalledWith({
+        where: { email: "missing@example.com" },
+      });
+    });
+
+    test("should return user with password when user is found", async () => {
+      mockFindFirst.mockResolvedValue({
+        id: "id-1",
+        firstName: "John",
+        lastName: "Doe",
+        username: "johndoe",
+        email: "john@example.com",
+        password: "hashed-password",
+      });
+
+      const userModule = await createUserModule();
+      const user = await userModule.findByEmail("john@example.com");
+
+      expect(user).toEqual({
+        id: "id-1",
+        firstName: "John",
+        lastName: "Doe",
+        username: "johndoe",
+        email: "john@example.com",
+        password: "hashed-password",
+      });
+      expect(mockFindFirst).toHaveBeenCalledWith({
+        where: { email: "john@example.com" },
+      });
     });
   });
 });
