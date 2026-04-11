@@ -33,6 +33,4 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 # Finder (MacOS) folder config
 .DS_Store
 
-/generated/prisma
-
-/generated/prisma
+# Prisma client is intentionally versioned for CI/runtime consistency
