@@ -15,6 +15,7 @@ jobs:
   build-test-coverage:
     name: Build, Test and Coverage
     runs-on: ubuntu-latest
+    environment: default
     defaults:
       run:
         working-directory: api
@@ -31,6 +32,9 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Generate Prisma client
+        run: bunx prisma generate
+
       - name: Build check (TypeScript)
         run: bunx tsc --noEmit
 
@@ -42,7 +46,7 @@ jobs:
         uses: codecov/codecov-action@v4
         with:
           files: api/coverage/lcov.info
-          use_oidc: true
+          token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: false
           verbose: false
 
