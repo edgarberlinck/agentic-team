@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   build-test-coverage:
@@ -37,15 +38,16 @@ jobs:
         run: bun test --coverage --coverage-reporter=text --coverage-reporter=lcov
 
       - name: Upload coverage to Codecov
-        if: always()
+        if: always() && hashFiles('api/coverage/lcov.info') != ''
         uses: codecov/codecov-action@v4
         with:
           files: api/coverage/lcov.info
+          use_oidc: true
           fail_ci_if_error: false
-          verbose: true
+          verbose: false
 
       - name: Generate coverage summary
-        if: always()
+        if: always() && hashFiles('api/coverage/lcov.info') != ''
         uses: irongut/CodeCoverageSummary@v1.3.0
         with:
           filename: api/coverage/lcov.info
@@ -57,7 +59,7 @@ jobs:
           indicators: true
 
       - name: Add coverage to job summary
-        if: always()
+        if: always() && hashFiles('code-coverage-results.md') != ''
         run: cat code-coverage-results.md >> "$GITHUB_STEP_SUMMARY"
         working-directory: .
 
