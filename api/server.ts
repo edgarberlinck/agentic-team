@@ -1,10 +1,18 @@
 import type { BunRequest } from "bun";
 import "./config";
 import { PrismaDatabase } from "./lib/database";
+import { buildBunRoutes } from "./lib/http/decorators";
+import { createAuthRoutes } from "./lib/http/routes/auth.routes";
+import { createAgentRoutes } from "./lib/http/routes/agent.routes";
 import { createSignUpUseCase } from "./lib/use-cases/signup/signup-usecase";
 import { createSignInUseCase } from "./lib/use-cases/signin/signin-usecase";
+import { createCreateAgentUseCase } from "./lib/use-cases/agent/create-agent-usecase";
+import { createListAgentsUseCase } from "./lib/use-cases/agent/list-agents-usecase";
 
-const userRepository = PrismaDatabase.getDatabase().user;
+const database = PrismaDatabase.getDatabase();
+const userRepository = database.user;
+const agentRepository = database.agent;
+
 const SignUp = createSignUpUseCase(userRepository);
 const SignIn = createSignInUseCase({
   userRepository,
@@ -13,68 +21,19 @@ const SignIn = createSignInUseCase({
       Bun.password.verify(plain, hash),
   },
 });
+const CreateAgent = createCreateAgentUseCase(agentRepository);
+const ListAgents = createListAgentsUseCase(agentRepository);
+
+const AuthRoutes = createAuthRoutes({ SignUp, SignIn });
+const AgentRoutes = createAgentRoutes({ ListAgents, CreateAgent });
+
+const routes = buildBunRoutes([AuthRoutes, AgentRoutes]);
 
 const server = Bun.serve({
   development: Bun.env.DEV === "true",
   port: Bun.env.PORT, // Zero uses a random port
   //hostname: "mydomain.com", // defaults to 0.0.0.0
-  routes: {
-    "/api/public/signup": {
-      POST: async (req: BunRequest) => {
-        const body = await req.json();
-        const result = await SignUp(body);
-
-        if (!result.success) {
-          return Response.json({ error: result.error }, { status: 500 });
-        }
-
-        return new Response(null, { status: 201 });
-      },
-    },
-    "/api/public/auth": {
-      POST: async (req: BunRequest) => {
-        const body = await req.json();
-        const result = await SignIn(body);
-
-        if (!result.success) {
-          return Response.json({ error: result.error }, { status: 500 });
-        }
-
-        const cookies = req.cookies;
-        // Read: https://bun.com/docs/runtime/hashing
-        cookies.set("user_id", result.data.id, {
-          maxAge: 60 * 60 * 24 * 7,
-          httpOnly: true,
-          secure: true,
-          path: "/",
-        });
-
-        return Response.json({ message: "Logged in" }, { status: 200 });
-      },
-      DELETE: (req: BunRequest) => {
-        const cookies = req.cookies;
-        cookies.delete("user_id", {
-          path: "/",
-        });
-        return Response.json({ message: "Logged out" }, { status: 200 });
-      },
-    },
-    "/api/v1/status": new Response("ok"),
-
-    // Sample dynamic route
-    "/api/v1/user/:id": (req: BunRequest) => {
-      return new Response(`Hello user ${req.params.id}`);
-    },
-
-    // Sample Per-Http method handler
-    "/api/v1/agents": {
-      GET: () => Response.json([{ id: 1, name: "mock agent" }]),
-      POST: async (req: BunRequest) => {
-        const body = await req.json();
-        return Response.json(body);
-      },
-    },
-  },
+  routes,
 
   fetch(req) {
     return new Response("Not found", { status: 404 });
