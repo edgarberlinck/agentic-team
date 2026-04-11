@@ -1,5 +1,9 @@
 # Agentic Team
 
+[![Build Status](https://github.com/edgarberlinck/agentic-team/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/edgarberlinck/agentic-team/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/edgarberlinck/agentic-team/branch/main/graph/badge.svg)](https://codecov.io/gh/edgarberlinck/agentic-team)
+![No Vibe Code](https://img.shields.io/badge/no--vibe--code-true-black)
+
 Projeto para explorar o CopilotSDK e construir um time de agentes especializados para resolver problemas técnicos reais.
 
 ## Manifesto
