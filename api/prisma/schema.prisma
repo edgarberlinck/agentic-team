@@ -20,4 +20,13 @@ model User {
   username String @unique
   email    String @unique
   password String
+  agents   Agent[]
+}
+
+model Agent {
+  id            String @id @default(uuid())
+  alias         String @unique
+  model         String
+  initialPrompt String
+  users User[]
 }
