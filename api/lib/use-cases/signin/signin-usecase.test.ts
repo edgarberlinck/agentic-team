@@ -1,6 +1,5 @@
-import { beforeEach, describe, expect, mock, spyOn, test } from "bun:test";
-import { PrismaDatabase } from "@/lib/database";
-import { SignIn } from "./signin-usecase";
+import { beforeEach, describe, expect, mock, test } from "bun:test";
+import { createSignInUseCase } from "./signin-usecase";
 
 const validInput = {
   email: "john@example.com",
@@ -24,18 +23,23 @@ const mockCreate = mock(async () => ({
   username: "unused@example.com",
   email: "unused@example.com",
 }));
+const mockVerify = mock(async () => true);
+
+const SignIn = createSignInUseCase({
+  userRepository: {
+    create: mockCreate,
+    findByEmail: mockFindByEmail,
+  },
+  passwordVerifier: {
+    verify: mockVerify,
+  },
+});
 
 beforeEach(() => {
-  spyOn(PrismaDatabase, "getDatabase").mockReturnValue({
-    user: {
-      create: mockCreate,
-      findByEmail: mockFindByEmail,
-    },
-  });
-
-  spyOn(Bun.password, "verify").mockResolvedValue(true as never);
   mockFindByEmail.mockClear();
   mockCreate.mockClear();
+  mockVerify.mockClear();
+  mockVerify.mockResolvedValue(true);
 });
 
 describe("SignIn", () => {
@@ -92,7 +96,7 @@ describe("SignIn", () => {
     });
 
     test("should return invalid credentials when password is wrong", async () => {
-      spyOn(Bun.password, "verify").mockResolvedValueOnce(false as never);
+      mockVerify.mockResolvedValueOnce(false);
 
       const result = await SignIn(validInput);
 

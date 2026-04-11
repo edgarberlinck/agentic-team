@@ -1,21 +1,13 @@
 import { prisma } from "@/lib/prisma";
+import type { IUserRepository } from "@/lib/use-cases/ports/user-repository";
+import type { NewUser, SafeUser, User } from "@/lib/shared/types/user";
 
-export interface IUserModule {
-  create: (user: Omit<User, "id">) => Promise<Omit<User, "password">>;
-  findByEmail: (email: string) => Promise<User | null>;
+export interface IUserModule extends IUserRepository {
+  query: (query: Partial<SafeUser>) => Promise<SafeUser[]>;
 }
 
-export type User = {
-  id: string;
-  firstName: string;
-  lastName: string;
-  username: string;
-  email: string;
-  password: string;
-};
-
 export class UserModule implements IUserModule {
-  async create(user: Omit<User, "id">): Promise<Omit<User, "password">> {
+  async create(user: NewUser): Promise<SafeUser> {
     const existingUser = await prisma.user.findFirst({
       where: {
         OR: [{ email: user.email }, { username: user.username }],
@@ -43,9 +35,7 @@ export class UserModule implements IUserModule {
     };
   }
 
-  async query(
-    query: Partial<Omit<User, "password">>,
-  ): Promise<Omit<User, "password">[]> {
+  async query(query: Partial<SafeUser>): Promise<SafeUser[]> {
     const users = await prisma.user.findMany({ where: query });
 
     return users.map((user) => ({

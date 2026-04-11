@@ -1,7 +1,18 @@
 import type { BunRequest } from "bun";
 import "./config";
-import { SignUp } from "./lib/use-cases/signup/signup-usecase";
-import { SignIn } from "./lib/use-cases/signin/signin-usecase";
+import { PrismaDatabase } from "./lib/database";
+import { createSignUpUseCase } from "./lib/use-cases/signup/signup-usecase";
+import { createSignInUseCase } from "./lib/use-cases/signin/signin-usecase";
+
+const userRepository = PrismaDatabase.getDatabase().user;
+const SignUp = createSignUpUseCase(userRepository);
+const SignIn = createSignInUseCase({
+  userRepository,
+  passwordVerifier: {
+    verify: async (plain: string, hash: string) =>
+      Bun.password.verify(plain, hash),
+  },
+});
 
 const server = Bun.serve({
   development: Bun.env.DEV === "true",
@@ -20,7 +31,7 @@ const server = Bun.serve({
         return new Response(null, { status: 201 });
       },
     },
-    "/api/public/signin": {
+    "/api/public/auth": {
       POST: async (req: BunRequest) => {
         const body = await req.json();
         const result = await SignIn(body);

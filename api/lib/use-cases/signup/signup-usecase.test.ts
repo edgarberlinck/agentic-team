@@ -1,6 +1,5 @@
-import { describe, expect, test, mock, spyOn, beforeEach } from "bun:test";
-import { PrismaDatabase } from "@/lib/database";
-import { SignUp } from "./signup-usecase";
+import { describe, expect, test, mock, beforeEach } from "bun:test";
+import { createSignUpUseCase } from "./signup-usecase";
 import { fromSignUpInputToUser } from "@/lib/converters/user.converter";
 
 const validInput = {
@@ -19,12 +18,16 @@ const mockCreatedUser = {
 };
 
 const mockUserCreate = mock(async () => mockCreatedUser);
+const mockFindByEmail = mock(async () => null);
+
+const SignUp = createSignUpUseCase({
+  create: mockUserCreate,
+  findByEmail: mockFindByEmail,
+});
 
 beforeEach(() => {
-  spyOn(PrismaDatabase, "getDatabase").mockReturnValue({
-    user: { create: mockUserCreate, findByEmail: mock(async () => null) },
-  });
   mockUserCreate.mockClear();
+  mockFindByEmail.mockClear();
 });
 
 describe("SignUp", () => {

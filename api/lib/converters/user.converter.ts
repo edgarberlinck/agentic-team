@@ -1,7 +1,7 @@
-import type { User } from "@/generated/prisma/browser";
+import type { NewUser } from "@/lib/shared/types/user";
 import type { SignupInput } from "../validator/signup-input.validator";
 
-export function fromSignUpInputToUser(from: SignupInput): Omit<User, "id"> {
+export function fromSignUpInputToUser(from: SignupInput): NewUser {
   return {
     username: from.email,
     firstName: from.firstName,

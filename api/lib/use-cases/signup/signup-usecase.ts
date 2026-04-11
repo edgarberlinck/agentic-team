@@ -3,31 +3,33 @@ import {
   type SignupInput,
 } from "@/lib/validator/signup-input.validator";
 import type { UseCaseOutput } from "../types";
-import { PrismaDatabase } from "@/lib/database";
-import { type User } from "@/lib/database/modules/user.module";
 import { fromSignUpInputToUser } from "@/lib/converters/user.converter";
+import type { IUserRepository } from "../ports/user-repository";
+import type { SafeUser, User } from "@/lib/shared/types/user";
 
-export async function SignUp(
-  form: unknown,
-): Promise<UseCaseOutput<Omit<User, "password">, SignupInput>> {
-  const validator = validateSignupInput(form);
+export function createSignUpUseCase(userRepository: IUserRepository) {
+  return async function SignUp(
+    form: unknown,
+  ): Promise<UseCaseOutput<SafeUser, SignupInput>> {
+    const validator = validateSignupInput(form);
 
-  if ("error" in validator) {
-    return { success: false, error: validator.error };
-  }
+    if ("error" in validator) {
+      return { success: false, error: validator.error };
+    }
 
-  try {
-    const user = await PrismaDatabase.getDatabase().user.create(
-      fromSignUpInputToUser(validator.data),
-    );
+    try {
+      const user = await userRepository.create(
+        fromSignUpInputToUser(validator.data),
+      );
 
-    const { password: _password, ...safeUser } = user as User;
+      const { password: _password, ...safeUser } = user as User;
 
-    return { success: true, data: safeUser };
-  } catch (error) {
-    return {
-      success: false,
-      error: { message: "User with this mail already exists" },
-    };
-  }
+      return { success: true, data: safeUser };
+    } catch (error) {
+      return {
+        success: false,
+        error: { message: "User with this mail already exists" },
+      };
+    }
+  };
 }
