@@ -41,6 +41,8 @@ describe("User Module", () => {
 
       const userModule = await createUserModule();
       const newUser = await userModule.create({
+        firstName: "Test",
+        lastName: "User",
         username: "testuser",
         email: "test@example.com",
         password: "password123",
@@ -66,6 +68,8 @@ describe("User Module", () => {
 
       expect(async () => {
         await userModule.create({
+          firstName: "New",
+          lastName: "User",
           username: "newuser",
           email: "test@example.com",
           password: "password123",
@@ -88,6 +92,8 @@ describe("User Module", () => {
 
       expect(async () => {
         await userModule.create({
+          firstName: "Test",
+          lastName: "User",
           username: "testuser",
           email: "new@example.com",
           password: "password123",
@@ -103,6 +109,8 @@ describe("User Module", () => {
 
       const userModule = await createUserModule();
       await userModule.create({
+        firstName: "Test",
+        lastName: "User",
         username: "testuser",
         email: "test@example.com",
         password: "password123",
@@ -154,7 +162,7 @@ describe("User Module", () => {
       const users = await userModule.query({ email: "test@example.com" });
 
       expect(users).toHaveLength(1);
-      expect(users[0].email).toBe("test@example.com");
+      expect(users[0]!.email).toBe("test@example.com");
       expect(users[0]).not.toHaveProperty("password");
       expect(mockFindMany).toHaveBeenCalledWith({
         where: { email: "test@example.com" },
@@ -175,7 +183,7 @@ describe("User Module", () => {
       const users = await userModule.query({ username: "testuser" });
 
       expect(users).toHaveLength(1);
-      expect(users[0].username).toBe("testuser");
+      expect(users[0]!.username).toBe("testuser");
       expect(users[0]).not.toHaveProperty("password");
       expect(mockFindMany).toHaveBeenCalledWith({
         where: { username: "testuser" },
@@ -196,7 +204,7 @@ describe("User Module", () => {
       const users = await userModule.query({ id: "specific-id" });
 
       expect(users).toHaveLength(1);
-      expect(users[0].id).toBe("specific-id");
+      expect(users[0]!.id).toBe("specific-id");
       expect(users[0]).not.toHaveProperty("password");
     });
 
